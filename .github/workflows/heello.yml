@@ -1,0 +1,23 @@
+
+name: BaseBreak - First Action
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  project-check:
+    name: Check project files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repository files
+        uses: actions/checkout@v4
+
+      - name: Check Unity project structure
+        run: |
+          test -d Assets
+          test -d Packages
+          test -d ProjectSettings
+          echo "BaseBreak Unity project structure looks good!"
