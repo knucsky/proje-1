@@ -1,0 +1,97 @@
+name: BaseBreak Unity CI-CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  project-check:
+    name: Check Unity project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Check project structure and build scene
+        run: |
+          test -d Assets
+          test -d Packages
+          test -d ProjectSettings
+          test -f Assets/Scenes/SampleScene.unity
+          test -f ProjectSettings/EditorBuildSettings.asset
+          echo "BaseBreak Unity project structure and scene look good."
+
+      - name: Check whether Unity build secrets are configured
+        id: license-check
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        shell: bash
+        run: |
+          if [ -n "$UNITY_LICENSE" ] && [ -n "$UNITY_EMAIL" ] && [ -n "$UNITY_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Unity build secrets are configured."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Unity build is waiting for repository secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD."
+            echo "Project checks passed; configure the secrets to enable automatic Windows builds."
+          fi
+
+      - name: Save build readiness
+        id: readiness
+        run: echo "See the previous step for Unity build readiness."
+
+    outputs:
+      build_ready: ${{ steps.license-check.outputs.ready }}
+
+  build-windows:
+    name: Build Windows executable
+    needs: project-check
+    if: needs.project-check.outputs.build_ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-StandaloneWindows64-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-StandaloneWindows64-
+
+      - name: Build BaseBreak for Windows
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          unityVersion: 6000.3.26f1
+          targetPlatform: StandaloneWindows64
+          buildName: BaseBreak
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BaseBreak-Windows
+          path: build/StandaloneWindows64/
+          if-no-files-found: error
+          retention-days: 14
