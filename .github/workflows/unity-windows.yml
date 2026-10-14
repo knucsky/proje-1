@@ -1,4 +1,4 @@
-name: BaseBreak - Unity Windows CI/CD
+name: Proje 1 - Unity Windows CI/CD
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   project-check:
-    name: Check Unity project structure
+    name: Check Proje 1 project structure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,10 +27,10 @@ jobs:
           test -d ProjectSettings
           test -f Assets/Scenes/SampleScene.unity
           test -f ProjectSettings/EditorBuildSettings.asset
-          echo "BaseBreak project structure and sample scene are present."
+          echo "Proje 1 project structure and sample scene are present."
 
   windows-build:
-    name: Build Windows player
+    name: Build Proje 1 for Windows
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
@@ -47,13 +47,13 @@ jobs:
           projectPath: .
           unityVersion: 6000.3.26f1
           targetPlatform: StandaloneWindows64
-          buildName: BaseBreak
+          buildName: Proje1
           buildsPath: build
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
-          name: BaseBreak-Windows
+          name: Proje-1-Windows
           path: build/StandaloneWindows64
           if-no-files-found: error
           retention-days: 14
