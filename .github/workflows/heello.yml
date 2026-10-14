@@ -1,5 +1,4 @@
-
-name: BaseBreak - First Action
+name: Proje 1 - İlk Kontrol
 
 on:
   push:
@@ -8,16 +7,16 @@ on:
 
 jobs:
   project-check:
-    name: Check project files
+    name: Proje 1 dosyalarını kontrol et
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get repository files
+      - name: Depoyu indir
         uses: actions/checkout@v4
 
-      - name: Check Unity project structure
+      - name: Unity proje klasörlerini kontrol et
         run: |
           test -d Assets
           test -d Packages
           test -d ProjectSettings
-          echo "BaseBreak Unity project structure looks good!"
+          echo "Proje 1 klasör kontrolü başarılı!"
