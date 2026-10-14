@@ -1,1 +1,21 @@
+name: Proje 1 - Basit Dosya Kontrolü
 
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  project-check:
+    name: Proje 1 klasörlerini kontrol et
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu indir
+        uses: actions/checkout@v4
+
+      - name: Unity proje klasörlerini kontrol et
+        run: |
+          test -d Assets
+          test -d Packages
+          test -d ProjectSettings
+          echo "Proje 1 dosya kontrolü başarılı!"
