@@ -1,0 +1,35 @@
+name: Proje 1 - Staging'den Main'e Pull Request
+
+on:
+  push:
+    branches:
+      - Staging
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pull-request:
+    name: Staging değişiklikleri için PR aç
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu indir
+        uses: actions/checkout@v4
+
+      - name: Main için Pull Request oluştur
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if gh pr list --base main --head Staging --state open --json number --jq 'length' | grep -q '^0$'; then
+            gh pr create \
+              --base main \
+              --head Staging \
+              --title "Staging → main: Proje 1 güncellemesi" \
+              --body "Bu Pull Request, Staging dalındaki değişiklikleri main dalına taşımak için otomatik oluşturuldu. Lütfen değişiklikleri ve GitHub Actions kontrollerini inceleyip uygun olduğunda birleştirin."
+          else
+            echo "Staging → main için açık bir Pull Request zaten var; yeni bir tane oluşturulmadı."
+          fi
