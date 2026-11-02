@@ -117,7 +117,7 @@ jobs:
           path: downloaded-build
 
       - name: Derlemeyi masaüstündeki deploy klasörüne kopyala
-        shell: pwsh
+        shell: powershell
         run: |
           $deployPath = Join-Path $env:USERPROFILE 'Desktop\deploy\Proje1'
           New-Item -ItemType Directory -Force -Path $deployPath | Out-Null
