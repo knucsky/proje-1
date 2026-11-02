@@ -103,3 +103,23 @@ jobs:
           name: Proje 1 ${{ github.ref_name }}
           generate_release_notes: true
           files: Proje1-Windows.zip
+
+  deploy-to-desktop:
+    name: Windows derlemesini bilgisayardaki deploy klasörüne kopyala
+    needs: build-windows
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64]
+    steps:
+      - name: Windows derlemesini indir
+        uses: actions/download-artifact@v4
+        with:
+          name: Proje-1-Windows
+          path: downloaded-build
+
+      - name: Derlemeyi masaüstündeki deploy klasörüne kopyala
+        shell: pwsh
+        run: |
+          $deployPath = Join-Path $env:USERPROFILE 'Desktop\deploy\Proje1'
+          New-Item -ItemType Directory -Force -Path $deployPath | Out-Null
+          Copy-Item -Path 'downloaded-build\*' -Destination $deployPath -Recurse -Force
+          Write-Host "Windows derlemesi kopyalandi: $deployPath"
